@@ -1,7 +1,7 @@
 ember-user-performance-monitoring
 ==============================================================================
 
-[Short description of the addon.]
+This addon add performance timing to your Ember application.
 
 
 Compatibility
@@ -23,8 +23,7 @@ ember install ember-user-performance-monitoring
 Usage
 ------------------------------------------------------------------------------
 
-[Longer description of how to use the addon in apps.]
-
+TODO
 
 Contributing
 ------------------------------------------------------------------------------
