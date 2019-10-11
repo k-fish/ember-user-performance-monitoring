@@ -20,7 +20,7 @@ const observer = new PerformanceObserver((list) => {
     window.__emberUserPerf[metricName].push(e);
 
     if (window.__emberUserPerfCallback) {
-      window.__emberUserPerfCallback(e);
+      window.__emberUserPerfCallback(metricName, e);
     }
   }
 });
