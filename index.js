@@ -1,4 +1,5 @@
 'use strict';
+const fs = require('fs');
 
 function readSnippet(fileName) {
   return fs.readFileSync(`${__dirname}/vendor/${fileName}`, 'utf8');
