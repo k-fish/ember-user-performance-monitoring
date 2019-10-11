@@ -1,0 +1,1 @@
+observer.observe({entryTypes: ['paint']});
