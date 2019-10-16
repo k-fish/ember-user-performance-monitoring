@@ -1,6 +1,7 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 import { computed } from '@ember/object';
+import { getOwner } from '@ember/application';
 import ttiPolyfill from 'tti-polyfill';
 
 export default Service.extend(Evented, {
