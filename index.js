@@ -11,7 +11,7 @@ module.exports = {
   contentFor(type, config) {
     const addonConfig = config['ember-user-performance-monitoring'] || {};
 
-    const { enabled, observePaint } = addonConfig;
+    const { enabled, observePaint, observeTTI } = addonConfig;
 
     if (type === 'head' && enabled) {
       let script = '<script>';
