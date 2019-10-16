@@ -24,8 +24,8 @@ export default Service.extend(Evented, {
 
   listen() {
     const callbackClosure = (eventName, e) => {
-      this._onEvent(eventName, e);
       this._seenEvents[eventName] = e;
+      this._onEvent(eventName, e);
     };
 
     if (window.__emberUserPerf && !window.__emberUserPerfCallback) {
