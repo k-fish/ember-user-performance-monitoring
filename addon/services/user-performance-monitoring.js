@@ -39,6 +39,7 @@ export default Service.extend(Evented, {
     if (this._config.observeTTI) {
       const opts = {} || this._config.observeTTI.options;
       ttiPolyfill.getFirstConsistentlyInteractive(opts).then((tti) => {
+        tti = Math.round(tti);
         callbackClosure('tti', tti);
       });
     }
