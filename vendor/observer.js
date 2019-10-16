@@ -7,17 +7,15 @@ const observer = new PerformanceObserver((list) => {
 
     window.__emberUserPerf = window.__emberUserPerf || {};
 
-    if (!window.__emberUserPerf[metricName]) {
-      window.__emberUserPerf[metricName] = [];
-    }
-
     const e = {
       time,
       duration,
       startTime
     };
 
-    window.__emberUserPerf[metricName].push(e);
+    if (!window.__emberUserPerf[metricName]) {
+      window.__emberUserPerf[metricName] = e;
+    }
 
     if (window.__emberUserPerfCallback) {
       window.__emberUserPerfCallback(metricName, e);
