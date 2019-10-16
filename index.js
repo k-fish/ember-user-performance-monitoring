@@ -21,6 +21,10 @@ module.exports = {
         script += readSnippet('observe-paint.js');
       }
 
+      if (observeTTI) {
+        script += readSnippet('observe-tti.js');
+      }
+
       script += '</script>';
 
       return script;
