@@ -1,10 +1,15 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
-import { computed } from '@ember/object';
+import { computed, getProperties } from '@ember/object';
 import { getOwner } from '@ember/application';
 import ttiPolyfill from 'tti-polyfill';
 
 export default Service.extend(Evented, {
+  init() {
+    this._seenEvents = {};
+    return this._super(...arguments);
+  },
+
   _onEvent(eventName, eventDetails) {
     this.trigger('timingEvent', eventName, eventDetails);
   },
@@ -13,9 +18,14 @@ export default Service.extend(Evented, {
     return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
   }),
 
+  getEvents(events) {
+    return getProperties(this._seenEvents, ...events);
+  },
+
   listen() {
     const callbackClosure = (eventName, e) => {
       this._onEvent(eventName, e);
+      this._seenEvents(eventName, e);
     };
 
     if (window.__emberUserPerf && !window.__emberUserPerfCallback) {
