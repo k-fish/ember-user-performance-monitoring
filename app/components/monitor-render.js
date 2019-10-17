@@ -1,0 +1,1 @@
+export { default } from 'ember-user-performance-monitoring/components/monitor-render';
