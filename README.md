@@ -29,19 +29,25 @@ You can call this anywhere, but listen should be called once.
 
 For example, adding it to the application routes `init()`:
 
-```
-userPerformanceMonitoring: service(),
+```js
+// app/routes/application.js
+import { inject as service } from '@ember/service';
+import Route from '@ember/routing/route';
 
-init() {
-  this.initUserPerformance();
-},
+export default Route.extend({
+  userPerformanceMonitoring: service(),
 
-async initUserPerformance() {
-  this.userPerformanceMonitoring.on('timingEvent', (eventName, eventDetails) => {
-    // console.log(eventName, eventDetails)
-  });
-  this.userPerformanceMonitoring.listen();
-}
+  init() {
+    this.initUserPerformance();
+  },
+
+  async initUserPerformance() {
+    this.userPerformanceMonitoring.on('timingEvent', (eventName, eventDetails) => {
+      // console.log(eventName, eventDetails)
+    });
+    this.userPerformanceMonitoring.listen();
+  }
+});
 ```
 
 Metrics
