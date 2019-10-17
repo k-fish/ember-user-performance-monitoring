@@ -15,7 +15,10 @@ export default Service.extend(Evented, {
   },
 
   _config: computed(function() {
-    return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
+    if (!this.get('isDestroyed') && !this.get('isDestroying')) {
+      return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
+    };
+    return {};
   }),
 
   getEvents(events) {
@@ -24,8 +27,10 @@ export default Service.extend(Evented, {
 
   listen() {
     const callbackClosure = (eventName, e) => {
-      this._seenEvents[eventName] = e;
-      this._onEvent(eventName, e);
+      if (!this.get('isDestroyed') && !this.get('isDestroying')) {
+        this._seenEvents[eventName] = e;
+        this._onEvent(eventName, e);
+      }
     };
 
     if (window.__emberUserPerf && !window.__emberUserPerfCallback) {
