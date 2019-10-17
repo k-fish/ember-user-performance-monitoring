@@ -10,6 +10,8 @@ const performance = window && window.performance;
 export default Component.extend({
   layout,
 
+  tagName: '',
+
   userPerformanceMonitoring: service(),
 
   _topLevel: computed.not('parentView'),
