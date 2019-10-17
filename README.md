@@ -19,11 +19,37 @@ Installation
 ember install ember-user-performance-monitoring
 ```
 
-
 Usage
 ------------------------------------------------------------------------------
 
-TODO
+Once installed, you'll need to add event listeners to the provided `userPerformanceMonitoring` service and then call
+`.listen` once all listeners are attached. 
+
+You can call this anywhere, but listen should be called once.
+
+For example, adding it to the application routes `init()`:
+
+```
+userPerformanceMonitoring: service(),
+
+init() {
+  this.initUserPerformance();
+},
+
+async initUserPerformance() {
+  this.userPerformanceMonitoring.on('timingEvent', (eventName, eventDetails) => {
+    // console.log(eventName, eventDetails)
+  });
+  this.userPerformanceMonitoring.listen();
+}
+```
+
+Metrics
+------------------------------------------------------------------------------
+The following lists the metrics measured by this addon:
+- FP (first-paint)
+- FCP (first-contentful-paint)
+- TTI (Time to *first consistently* interactive) - experimental, [provided by google chrome labs](https://github.com/GoogleChromeLabs/tti-polyfill)
 
 Contributing
 ------------------------------------------------------------------------------
