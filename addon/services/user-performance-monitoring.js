@@ -25,7 +25,19 @@ export default Service.extend(Evented, {
   },
 
   _onEvent(eventName, eventDetails) {
-    this.trigger('timingEvent', eventName, eventDetails, this.router.currentURL);
+    const additionalDetails = {
+      currentURL: this.router.currentURL
+    };
+
+    if (this._config.observeLoad) {
+      const hiddenFor = window.__metric_hidden_for;
+      const visibilityChanged = !!window.__metric_last_visible || !!hiddenFor;
+      Object.assign(additionalDetails, {
+        visibilityChanged,
+        hiddenFor
+      });
+    }
+    this.trigger('timingEvent', eventName, eventDetails, additionalDetails);
   },
 
   _config: computed(function() {

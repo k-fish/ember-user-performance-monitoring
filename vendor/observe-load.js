@@ -11,4 +11,13 @@ if (window.performance) {
     }
     window.__metric_load = time;
   });
+  window.__metric_hidden_for = 0;
+  window.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      window.__metric_last_visible = Math.round(window.performance.now());
+    }
+    if (!document.hidden && window.__metric_last_visible) {
+      window.__metric_hidden_for += Math.round(performance.now() - window.__metric_last_visible);
+    }
+  });
 }
