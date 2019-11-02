@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
-import { computed, getProperties } from '@ember/object';
+import { computed, get, getProperties } from '@ember/object';
 import { getOwner } from '@ember/application';
 import { inject as service } from '@ember/service';
 import { assert } from '@ember/debug';
@@ -36,6 +36,16 @@ export default Service.extend(Evented, {
         visibilityChanged,
         hiddenFor
       });
+    }
+
+    if (this._config.includeConnector) {
+      const connection = get(window, 'navigator.connection');
+      if (connection) {
+        Object.assign(additionalDetails, {
+          downlink: connection.downlink,
+          rtt: connection.rtt
+        }
+      }
     }
     this.trigger('timingEvent', eventName, eventDetails, additionalDetails);
   },
