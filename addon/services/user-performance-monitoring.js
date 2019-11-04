@@ -44,7 +44,7 @@ export default Service.extend(Evented, {
         Object.assign(additionalDetails, {
           downlink: connection.downlink,
           rtt: connection.rtt
-        }
+        });
       }
     }
     this.trigger('timingEvent', eventName, eventDetails, additionalDetails);
