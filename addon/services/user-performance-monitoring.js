@@ -38,7 +38,7 @@ export default Service.extend(Evented, {
       });
     }
 
-    if (this._config.includeConnector) {
+    if (this._config.includeConnection) {
       const connection = get(window, 'navigator.connection');
       if (connection) {
         Object.assign(additionalDetails, {
