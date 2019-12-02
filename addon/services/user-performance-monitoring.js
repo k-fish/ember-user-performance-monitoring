@@ -58,7 +58,9 @@ export default Service.extend(Evented, {
   }),
 
   addRenderMonitor(key, tree) {
-    assert('Keys for render monitoring should be unique', !this._renderMonitoringTree[key]);
+    if (!this._renderMonitoringTree[key]) {
+      return; // Only monitor the first render
+    }
     const promisifiedTree = hash(tree);
     this._renderMonitors[key] = promisifiedTree;
     this._renderMonitoringTree[key] = promisifiedTree;
