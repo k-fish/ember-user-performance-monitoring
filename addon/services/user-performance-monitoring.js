@@ -7,10 +7,84 @@ import { assert } from '@ember/debug';
 import { hash } from 'rsvp';
 import ttiPolyfill from 'tti-polyfill';
 
+function getAssetTimings(options) {
+  const performance = window.performance;
+
+  if (!performance) {
+    return {};
+  }
+
+  const watchedAssets = options.watchedAssets;
+
+  let assetAllStart = Number.POSITIVE_INFINITY;
+  let assetAllEnd = Number.NEGATIVE_INFINITY;
+  let lastLoadedWatchedAsset = ''; // The watched assets might not load at the same time, but for performance the last loaded asset will be the one blocking render, regardless of when they started (unless your assets include non-critical path files)
+
+  const result = {};
+
+  performance.getEntriesByType("resource").forEach(resource => {
+    const { name: resourceName } = resource;
+
+    Object.entries(watchedAssets).forEach(([name, value]) => {
+      const regex = new RegExp(value.matches);
+      if (resourceName.match(regex)) {
+        const startTime = Math.round(resource.startTime);
+        const responseEnd = Math.round(resource.responseEnd);
+
+        if (responseEnd > assetAllEnd) {
+          lastLoadedWatchedAsset = name;
+        }
+
+        assetAllStart = Math.min(startTime, assetAllStart);
+        assetAllEnd = Math.max(responseEnd, assetAllEnd);
+
+        const transferDuration = responseEnd - startTime;
+        const isCached = !resource.transferSize;
+        const transferSize = resource.transferSize;
+        const encodedBodySize = resource.encodedBodySize;
+        const decodedBodySize = resource.decodedBodySize;
+        const resourceName = resource.name;
+
+        const resourceResult = {
+          transferDuration,
+          isCached,
+          transferSize,
+          encodedBodySize,
+          decodedBodySize,
+          resourceName
+        };
+
+        const namedResourceResult = {};
+        Object.entries(resourceResult).forEach(([field, value]) => namedResourceResult[`${name}_${field}`] = value);
+        Object.assign(result, namedResourceResult);
+      }
+    });
+  });
+
+  const allWatchedAssetsDuration = assetAllEnd - assetAllStart;
+  Object.assign(result, {
+    allWatchedAssetsDuration,
+    lastLoadedWatchedAsset
+  });
+
+  if (allWatchedAssetsDuration <= 0 ) {
+    return {}; // Guard to not return negative infinity
+  }
+
+  return result;
+}
+
 export default Service.extend(Evented, {
   _isListening: false,
 
   router: service(),
+
+  _config: computed(function() {
+    if (!this.get('isDestroyed') && !this.get('isDestroying')) {
+      return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
+    };
+    return {};
+  }),
 
   init() {
     this._seenEvents = {};
@@ -33,8 +107,10 @@ export default Service.extend(Evented, {
       const hiddenFor = window.__metric_hidden_for;
       const visibilityChanged = !!window.__metric_last_visible || !!hiddenFor;
       Object.assign(additionalDetails, {
+        load: {
         visibilityChanged,
         hiddenFor
+        }
       });
     }
 
@@ -42,20 +118,26 @@ export default Service.extend(Evented, {
       const connection = get(window, 'navigator.connection');
       if (connection) {
         Object.assign(additionalDetails, {
-          downlink: connection.downlink,
-          rtt: connection.rtt
+          connection: {
+            downlink: connection.downlink,
+            rtt: connection.rtt
+          }
         });
       }
     }
+
+    if (this._config.includeAssetTimings) {
+      const assetTimingOptions = this._config.assetTimingOptions;
+      if (assetTimingOptions) {
+        const assetTimings = getAssetTimings(assetTimingOptions);
+        Object.assign(additionalDetails, {
+          assetTimings
+        });
+      }
+    }
+
     this.trigger('timingEvent', eventName, eventDetails, additionalDetails);
   },
-
-  _config: computed(function() {
-    if (!this.get('isDestroyed') && !this.get('isDestroying')) {
-      return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
-    };
-    return {};
-  }),
 
   addRenderMonitor(key, tree) {
     if (!this._renderMonitoringTree[key]) {

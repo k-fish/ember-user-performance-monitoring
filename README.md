@@ -42,20 +42,57 @@ export default Route.extend({
   },
 
   async initUserPerformance() {
-    this.userPerformanceMonitoring.on('timingEvent', (eventName, eventDetails) => {
+    this.userPerformanceMonitoring.on('timingEvent', (eventName, eventDetails, additionalDetails) => {
       // console.log(eventName, eventDetails)
+      // Other details:
+      // const { currentURL } = additionalDetails;
+      // const { load } = additionalDetails;
+      // const { connection } = additionalDetails;
+      // const { assetTimings } = additionalDetails;
     });
     this.userPerformanceMonitoring.listen();
   }
 });
 ```
 
+### Timing Assets
+
+You can time any assets that get loaded during the start of your app by using the following config:
+```js
+  ENV['ember-user-performance-monitoring'] = {
+    includeAssetTimings: true,
+    assetTimingOptions: {
+      watchedAssets: {
+        app_js: {
+          matches: 'assets/app.*js$'
+        },
+        app_css: {
+          matches: 'assets/app.*css$'
+        },
+        vendor_js: {
+          matches: 'assets/vendor.*js$'
+        },
+        vendor_css: {
+          matches: 'assets/vendor.*css$'
+        }
+      }
+    }
+```
+
+This will match any resource names against the provided regex and provide timings using the name (eg. `app_js`) when the paint event fires as additional details (so you can record asset timing in conjunction with `DCL`or `TTI`).
+
 Metrics
 ------------------------------------------------------------------------------
-The following lists the metrics measured by this addon:
+The following lists the load metrics measured by this addon:
 - FP (first-paint)
 - FCP (first-contentful-paint)
+- FMP (first meaningful paint) - Experimental, but this is measured using a wrapper component around the hero component for a page. Since it's manually defined, it should be more accurate then the version that uses largest element, etc.
 - TTI (Time to *first consistently* interactive) - experimental, [provided by google chrome labs](https://github.com/GoogleChromeLabs/tti-polyfill)
+
+Additional data collected that can be sent back:
+- Visibility / Hidden duration (for when a user navigates away during load)
+- Connection (from navigator.connection API if available)
+- Asset Timings (uses resource timing api, records transfer and timing, as well as whether local cache was hit)
 
 Contributing
 ------------------------------------------------------------------------------
