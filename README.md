@@ -1,7 +1,7 @@
 ember-user-performance-monitoring
 ==============================================================================
 
-This addon add performance timing to your Ember application.
+Use this addon to add performance timing to your Ember application. It does not automatically send data, but lets you set up event listeners on timing events, which you can use to integrate with a metric collecting tool of your choice.
 
 
 Compatibility
