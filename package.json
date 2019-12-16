@@ -1,7 +1,7 @@
 {
   "name": "ember-user-performance-monitoring",
-  "version": "0.0.20",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.21",
+  "description": "Adds performance timing to your Ember application",
   "keywords": [
     "ember-addon"
   ],

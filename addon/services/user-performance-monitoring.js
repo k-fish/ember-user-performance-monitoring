@@ -5,6 +5,7 @@ import { getOwner } from '@ember/application';
 import { inject as service } from '@ember/service';
 import { assert } from '@ember/debug';
 import { hash } from 'rsvp';
+import { run } from '@ember/runloop';
 import ttiPolyfill from 'tti-polyfill';
 
 function getAssetTimings(options) {
@@ -74,6 +75,20 @@ function getAssetTimings(options) {
   return result;
 }
 
+function getTransitionKey(transition, router) {
+  const { from, to } = getTransitionInformation(transition, router);
+  return [from, to].join(' -> ');
+};
+
+function getTransitionInformation(transition, router) {
+  const from = transition && transition.from ? transition.from.name : 'none';
+  const to = transition ? transition.to.name : router.currentRouteName;
+  return {
+    from,
+    to
+  }
+};
+
 export default Service.extend(Evented, {
   _isListening: false,
 
@@ -90,12 +105,125 @@ export default Service.extend(Evented, {
     this._seenEvents = {};
     this._renderMonitoringTree = {};
     this._renderMonitors = {};
+    this._performanceMarks = {};
 
     this._topLevelRenderPromise = new Promise(resolve => {
       this._topLevelRenderResolve = resolve;
     });
 
+    this.watchTransitions();
+
     return this._super(...arguments);
+  },
+
+  watchTransitions() {
+    if (this._config.watchTransitions) {
+      this._transitionTimings = {};
+      this._transitionToTimings = {};
+      this._totalTransitionCount = 0;
+
+      let lastTransition;
+      let lastTransitionTime = Date.now();
+      let lastTransitionEndTime = Date.now();
+      let lastTransitionInfo;
+      let lastTransitionKey;
+
+      this.router._router.on('willTransition', (transition) => {
+        lastTransition = transition;
+        lastTransitionInfo = getTransitionInformation(transition, this.router);
+        lastTransitionKey = getTransitionKey(transition, this.router);
+        lastTransitionTime = Date.now();
+        this.startPerformanceMeasure(this._getTransitionMeasureLabel('load', lastTransitionKey));
+      });
+
+      this.router._router.on('didTransition', () => {
+        lastTransitionEndTime = Date.now();
+        this._totalTransitionCount++;
+
+        this.endPerformanceMeasure(this._getTransitionMeasureLabel('load', lastTransitionKey));
+        this.startPerformanceMeasure(this._getTransitionMeasureLabel('render', lastTransitionKey));
+
+
+        if (!this._transitionToTimings[lastTransitionInfo.to]) {
+          this._transitionToTimings[lastTransitionInfo.to] = {
+            transitionToCount: 0,
+            renderToCount: 0
+          };
+        }
+
+        const transitionToTiming = this._transitionToTimings[lastTransitionInfo.to];
+        transitionToTiming['transitionToCount']++;
+
+        if (!this._transitionTimings[lastTransitionKey]) {
+          this._transitionTimings[lastTransitionKey] = {
+            transitionCount: 0,
+            renderCount: 0
+          };
+        }
+
+
+        const transitionTiming = this._transitionTimings[lastTransitionKey];
+        transitionTiming['transitionNumber'] = this._totalTransitionCount;
+        transitionTiming['transition'] = lastTransitionEndTime - lastTransitionTime;
+        transitionTiming['transitionCount']++;
+
+        run.next(() => {
+          run.scheduleOnce('destroy', () => {
+            if (!transitionTiming['render']) {
+              const eventDetails = Object.assign({}, transitionTiming, lastTransitionInfo, transitionToTiming);
+              this.trigger('timingEvent', 'transitionWithoutRender', eventDetails);
+            }
+          });
+        });
+      });
+
+      this.on('didRenderMonitorComponent', () => {
+        const renderTime = Date.now();
+        this.endPerformanceMeasure(this._getTransitionMeasureLabel('render', lastTransitionKey));
+        const transitionToTiming = this._transitionToTimings[lastTransitionInfo.to];
+        transitionToTiming['renderToCount']++;
+
+        const transitionTiming = this._transitionTimings[lastTransitionKey];
+        transitionTiming['render'] = renderTime - lastTransitionEndTime;
+        transitionTiming['renderCount']++;
+
+        const eventDetails = Object.assign({}, transitionTiming, lastTransitionInfo, transitionToTiming);
+        this.trigger('timingEvent', 'transitionWithRender', eventDetails);
+      });
+    }
+  },
+
+  _getTransitionMeasureLabel(stage, transition) {
+    return `${stage} (${transition})`;
+  },
+
+  startPerformanceMeasure(label) {
+    if (!window || !window.performance || !this._config.enablePerformanceMeasures) {
+      return;
+    }
+    try {
+      const mark = performance.mark(label);
+      this._performanceMarks[label] = mark;
+    } catch(e) {
+      //
+    }
+  },
+
+  endPerformanceMeasure(label) {
+    if (!window || !window.performance || !this._config.enablePerformanceMeasures) {
+      return;
+    }
+
+    try {
+      const startMark = this._performanceMarks[label];
+      if (!startMark) {
+        return;
+      }
+
+      performance.measure(label, { start: label });
+    } catch(e) {
+      //
+    }
   },
 
   _onEvent(eventName, eventDetails) {
