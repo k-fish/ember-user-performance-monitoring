@@ -94,6 +94,10 @@ ENV['ember-user-performance-monitoring'] = {
 }
 ```
 
+Then, all transitions will automatically be caught via the router microlib. Transition time includes `normalizeResponse` and `setupController`.
+
+If you wish to capture render time for the page as well, putting `{{render-performance-monitor}}` at the bottom of target routes uses `didRender` and then puts a timing at the end of the destroy queue, to offer lightweight approximate render times for the initial render of the page.
+
 Then you can listen on `timingEvent` on the performance service.
 ```js
 // app/routes/application.js
