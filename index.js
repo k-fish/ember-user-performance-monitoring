@@ -3,7 +3,7 @@ const fs = require('fs');
 
 function readSnippet(fileName) {
   return fs.readFileSync(`${__dirname}/vendor/${fileName}`, 'utf8');
-};
+}
 
 module.exports = {
   name: require('./package').name,
