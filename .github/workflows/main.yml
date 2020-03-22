@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  
+    env:
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Volta
+        uses: rwjblue/setup-volta@v1
+      - name: Install dependencies (npm)
+        run: npm install
+      - name: Lint (hbs)
+        run: npm run lint:hbs
+      - name: Lint (js)
+        run: npm run lint:js
+      - name: Run test
+        run: npm run test
+
+  ember-try:
+    name: ember-try (${{ matrix.scenario }})
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+    strategy:
+      matrix:
+        scenario:
+          - release
+          - beta
+          - canary
+          - lts-3.4
+          - lts-3.8
+          - lts-3.12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Volta
+        uses: rwjblue/setup-volta@v1
+      - name: Install dependencies (npm)
+        run: npm install
+      - name: Setup ember-try scenario
+        run: yarn ember try:one ember-${{ matrix.scenario }} --skip-cleanup --- cat package.json
+      - name: Build
+        run: yarn ember build --environment test
+      - name: Run test
+        # Due to a bug in ember-cli, running `ember test` with `--path` doesn't set `EMBER_ENV=test`
+        # See https://github.com/ember-cli/ember-cli/issues/8922
+        run: EMBER_ENV=test yarn ember test --path dist --filter="Ember Debug"
