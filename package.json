@@ -50,12 +50,17 @@
     "eslint-plugin-ember": "^7.1.0",
     "eslint-plugin-node": "^10.0.0",
     "loader.js": "^4.7.0",
-    "qunit-dom": "^1.1.0"
+    "qunit-dom": "^1.1.0",
+    "tti-polyfill": "^0.2.2"
   },
   "engines": {
-    "node": "8.* || >= 10.*"
+    "node": "10.* || >= 12"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
+  },
+  "volta": {
+    "node": "12.0.0",
+    "yarn": "1.22.0"
   }
 }

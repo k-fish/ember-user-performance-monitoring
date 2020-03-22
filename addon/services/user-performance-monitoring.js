@@ -3,7 +3,6 @@ import Evented from '@ember/object/evented';
 import { computed, get, getProperties } from '@ember/object';
 import { getOwner } from '@ember/application';
 import { inject as service } from '@ember/service';
-import { assert } from '@ember/debug';
 import { hash } from 'rsvp';
 import { run } from '@ember/runloop';
 import ttiPolyfill from 'tti-polyfill';
@@ -78,7 +77,7 @@ function getAssetTimings(options) {
 function getTransitionKey(transition, router) {
   const { from, to } = getTransitionInformation(transition, router);
   return [from, to].join(' -> ');
-};
+}
 
 function getTransitionInformation(transition, router) {
   const from = transition && transition.from ? transition.from.name : 'none';
@@ -87,7 +86,7 @@ function getTransitionInformation(transition, router) {
     from,
     to
   }
-};
+}
 
 export default Service.extend(Evented, {
   _isListening: false,
@@ -97,7 +96,7 @@ export default Service.extend(Evented, {
   _config: computed(function() {
     if (!this.get('isDestroyed') && !this.get('isDestroying')) {
       return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
-    };
+    }
     return {};
   }),
 
@@ -122,14 +121,12 @@ export default Service.extend(Evented, {
       this._transitionToTimings = {};
       this._totalTransitionCount = 0;
 
-      let lastTransition;
       let lastTransitionTime = Date.now();
       let lastTransitionEndTime = Date.now();
       let lastTransitionInfo;
       let lastTransitionKey;
 
       this.router._router.on('willTransition', (transition) => {
-        lastTransition = transition;
         lastTransitionInfo = getTransitionInformation(transition, this.router);
         lastTransitionKey = getTransitionKey(transition, this.router);
         lastTransitionTime = Date.now();
@@ -168,7 +165,7 @@ export default Service.extend(Evented, {
         transitionTiming['transitionCount']++;
 
         run.next(() => {
-          run.scheduleOnce('destroy', () => {
+          run.schedule('destroy', () => {
             if (!transitionTiming['render']) {
               const eventDetails = Object.assign({}, transitionTiming, lastTransitionInfo, transitionToTiming);
               this.trigger('timingEvent', 'transitionWithoutRender', eventDetails);

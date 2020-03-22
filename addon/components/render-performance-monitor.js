@@ -7,10 +7,12 @@ export default Component.extend({
 
   userPerformanceMonitoring: service(),
 
+  triggerMonitor() {
+    this.userPerformanceMonitoring.trigger('didRenderMonitorComponent');
+  },
+
   didRender() {
-    run.scheduleOnce('destroy', () => {
-      this.userPerformanceMonitoring.trigger('didRenderMonitorComponent');
-    });
+    run.scheduleOnce('destroy', this, this.triggerMonitor);
   }
 });
 
