@@ -1,1 +1,1 @@
-observer.observe({entryTypes: ['paint']});
+if (observer && observer.observe) { observer.observe({entryTypes: ['paint']}); }
