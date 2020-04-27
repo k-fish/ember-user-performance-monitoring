@@ -5,6 +5,7 @@ import { getOwner } from '@ember/application';
 import { inject as service } from '@ember/service';
 import { hash } from 'rsvp';
 import { run } from '@ember/runloop';
+import { v4 as uuidv4 } from 'uuid';
 import ttiPolyfill from 'tti-polyfill';
 
 function getAssetTimings(options) {
@@ -93,6 +94,8 @@ export default Service.extend(Evented, {
 
   router: service(),
 
+  currentTransitionId: undefined,
+
   _config: computed(function() {
     if (!this.get('isDestroyed') && !this.get('isDestroying')) {
       return getOwner(this).resolveRegistration('config:environment')['ember-user-performance-monitoring'];
@@ -130,6 +133,7 @@ export default Service.extend(Evented, {
         lastTransitionInfo = getTransitionInformation(transition, this.router);
         lastTransitionKey = getTransitionKey(transition, this.router);
         lastTransitionTime = Date.now();
+        this.currentTransitionId = uuidv4();
         this.startPerformanceMeasure(this._getTransitionMeasureLabel('load', lastTransitionKey));
       });
 
@@ -162,6 +166,7 @@ export default Service.extend(Evented, {
         const transitionTiming = this._transitionTimings[lastTransitionKey];
         transitionTiming['transitionNumber'] = this._totalTransitionCount;
         transitionTiming['transition'] = lastTransitionEndTime - lastTransitionTime;
+        transitionTiming['transitionID'] = this.currentTransitionId;
         transitionTiming['transitionCount']++;
 
         run.next(() => {
@@ -169,6 +174,7 @@ export default Service.extend(Evented, {
             if (!transitionTiming['render']) {
               const eventDetails = Object.assign({}, transitionTiming, lastTransitionInfo, transitionToTiming);
               this.trigger('timingEvent', 'transitionWithoutRender', eventDetails);
+              this.currentTransitionId = undefined;
             }
           });
         });
@@ -186,6 +192,7 @@ export default Service.extend(Evented, {
 
         const eventDetails = Object.assign({}, transitionTiming, lastTransitionInfo, transitionToTiming);
         this.trigger('timingEvent', 'transitionWithRender', eventDetails);
+        this.currentTransitionId = undefined;
       });
     }
   },

@@ -1,6 +1,6 @@
 {
   "name": "ember-user-performance-monitoring",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "Adds performance timing to your Ember application",
   "keywords": [
     "ember-addon"
@@ -23,7 +23,8 @@
   "dependencies": {
     "ember-cli-babel": "^7.11.1",
     "ember-cli-htmlbars": "^4.0.0",
-    "tti-polyfill": "^0.2.2"
+    "tti-polyfill": "^0.2.2",
+    "uuid": "^7.0.3"
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
@@ -51,7 +52,8 @@
     "eslint-plugin-node": "^11.0.0",
     "loader.js": "^4.7.0",
     "qunit-dom": "^1.1.0",
-    "tti-polyfill": "^0.2.2"
+    "tti-polyfill": "^0.2.2",
+    "uuid": "^7.0.3"
   },
   "engines": {
     "node": "10.* || >= 12"
