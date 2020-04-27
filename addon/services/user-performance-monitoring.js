@@ -5,8 +5,8 @@ import { getOwner } from '@ember/application';
 import { inject as service } from '@ember/service';
 import { hash } from 'rsvp';
 import { run } from '@ember/runloop';
-import { v4 as uuidv4 } from 'uuid';
 import ttiPolyfill from 'tti-polyfill';
+import { v4 as uuidv4 } from 'uuid';
 
 function getAssetTimings(options) {
   const performance = window.performance;
