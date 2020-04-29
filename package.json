@@ -1,6 +1,6 @@
 {
   "name": "ember-user-performance-monitoring",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "Adds performance timing to your Ember application",
   "keywords": [
     "ember-addon"

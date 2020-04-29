@@ -1,5 +1,6 @@
+var observer;
 if (PerformanceObserver) {
-  const observer = new PerformanceObserver(function(list) {
+  observer = new PerformanceObserver(function(list) {
     list.getEntries().forEach(function(entry) {
       const metricName = entry.name;
       const startTime = entry.startTime;
