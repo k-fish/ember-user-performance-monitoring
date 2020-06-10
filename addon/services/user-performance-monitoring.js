@@ -129,7 +129,7 @@ export default Service.extend(Evented, {
       let lastTransitionInfo;
       let lastTransitionKey;
 
-      this.router._router.on('willTransition', (transition) => {
+      this.router.on('routeWillChange', (transition) => {
         lastTransitionInfo = getTransitionInformation(transition, this.router);
         lastTransitionKey = getTransitionKey(transition, this.router);
         lastTransitionTime = Date.now();
@@ -137,7 +137,7 @@ export default Service.extend(Evented, {
         this.startPerformanceMeasure(this._getTransitionMeasureLabel('load', lastTransitionKey));
       });
 
-      this.router._router.on('didTransition', () => {
+      this.router.on('routeDidChange', () => {
         lastTransitionEndTime = Date.now();
         this._totalTransitionCount++;
 
