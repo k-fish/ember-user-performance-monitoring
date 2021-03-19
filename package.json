@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "ember-cli-babel": "^7.11.1",
-    "ember-cli-htmlbars": "^4.0.0",
+    "ember-cli-htmlbars": "^5.7.1",
     "ember-auto-import": "^1.5.3",
     "tti-polyfill": "^0.2.2",
     "uuid": "^7.0.3"
